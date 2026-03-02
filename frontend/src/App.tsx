@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
 // Auth Pages
+import { Landing } from './pages/Landing';
 import { Login } from './pages/auth/Login';
 import { PatientRegister } from './pages/auth/PatientRegister';
 import { DoctorRegister } from './pages/auth/DoctorRegister';
@@ -33,6 +34,7 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={user ? <Navigate to={`/${user.role}`} replace /> : <Landing />} />
       <Route path="/login" element={!user ? <Login /> : <Navigate to={`/${user.role}`} replace />} />
       <Route path="/register/patient" element={!user ? <PatientRegister /> : <Navigate to="/patient" replace />} />
       <Route path="/register/doctor" element={!user ? <DoctorRegister /> : <Navigate to="/doctor" replace />} />
@@ -96,18 +98,6 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute allowedRoles={['admin']}>
             <Settings />
           </ProtectedRoute>
-        }
-      />
-
-      {/* Default Route */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            <Navigate to={`/${user.role}`} replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
         }
       />
 

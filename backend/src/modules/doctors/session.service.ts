@@ -228,6 +228,7 @@ class SessionService {
       }
 
       // FIRST: Mark the current token as SERVED (if there is one)
+      let currentTokenMarkedAsServed = false;
       if (session.currentTokenNo > 0) {
         const currentToken = await tx.token.findFirst({
           where: {
@@ -255,6 +256,8 @@ class SessionService {
             }
           });
 
+          currentTokenMarkedAsServed = true;
+
           // Log the served action
           await tx.tokenLog.create({
             data: {
@@ -276,6 +279,13 @@ class SessionService {
             tokenId: currentToken.id.toString(),
             status: 'SERVED',
             servedAt: new Date().toISOString()
+          });
+
+          // Emit event to doctor room
+          socketManager.emitToDoctorRoom(doctorId, 'token:served', {
+            doctorId,
+            sessionId: session.id.toString(),
+            tokenNo: currentToken.tokenNo
           });
         }
       }
@@ -324,6 +334,19 @@ class SessionService {
         });
 
         if (!nextAvailableToken) {
+          // If we had a current token that was just marked as served, we can successfully return early
+          // indicating the queue is over.
+          if (currentTokenMarkedAsServed) {
+            return {
+              session: {
+                id: session.id.toString(),
+                currentToken: session.currentTokenNo,
+                maxToken: session.maxTokenNo,
+                status: session.status
+              },
+              message: 'Current token marked as SERVED. No more waiting tokens.'
+            };
+          }
           throw new Error('No waiting tokens found');
         }
 

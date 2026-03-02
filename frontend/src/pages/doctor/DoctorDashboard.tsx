@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { socketService } from '../../services/socket';
 import type { Session, Token } from '../../types';
 import toast from 'react-hot-toast';
 import { Sidebar } from '../../components/layout/Sidebar';
@@ -17,7 +18,20 @@ export const DoctorDashboard: React.FC = () => {
 
     useEffect(() => {
         loadSession();
-    }, []);
+
+        // Listen for new token bookings to update the queue in real-time
+        const handleTokenBooked = () => {
+            loadSession(false);
+        };
+        socketService.on('token:booked', handleTokenBooked);
+
+        return () => {
+            socketService.off('token:booked', handleTokenBooked);
+            if (user?.id) {
+                socketService.leaveDoctorRoom(user.id);
+            }
+        };
+    }, [user?.id]);
 
     const loadSession = async (showErrors = false) => {
         try {
@@ -27,6 +41,7 @@ export const DoctorDashboard: React.FC = () => {
                     setSession(response.data.session);
                     if (response.data.session.id) {
                         await loadSessionTokens(response.data.session.id);
+                        socketService.joinDoctorRoom(user.id); // Join doctor room for live updates
                     }
                 }
             }
@@ -173,10 +188,10 @@ export const DoctorDashboard: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={handleCallNext}
-                                    disabled={actionLoading || waitingTokens.length === 0}
+                                    disabled={actionLoading || (waitingTokens.length === 0 && !todayTokens.some((t: Token) => t.status === 'CALLED'))}
                                     className="btn-primary px-6"
                                 >
-                                    Next Token
+                                    {waitingTokens.length === 0 && todayTokens.some((t: Token) => t.status === 'CALLED') ? 'Mark as Served' : 'Next Token'}
                                 </button>
                                 <button onClick={handleEndSession} disabled={actionLoading} className="btn-red">
                                     End Session

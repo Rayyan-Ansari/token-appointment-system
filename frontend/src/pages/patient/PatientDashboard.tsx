@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { socketService } from '../../services/socket';
 import type { Token } from '../../types';
 import { format } from 'date-fns';
 import { Sidebar } from '../../components/layout/Sidebar';
 import { Badge } from '../../components/ui/Badge';
 import { Avatar } from '../../components/ui/Avatar';
 import { Spinner } from '../../components/ui/Spinner';
+import { NotificationModal } from '../../components/ui/NotificationModal';
+import toast from 'react-hot-toast';
 
 export const PatientDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -16,8 +19,56 @@ export const PatientDashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'profile'>('dashboard');
 
+    // Notification State
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+    const [notificationData, setNotificationData] = useState<{ doctorName: string; tokenNumber: number | string } | null>(null);
+
+    // Keep a ref of tokens to access latest state inside socket callbacks without stale closures
+    const tokensRef = useRef(tokens);
+    useEffect(() => {
+        tokensRef.current = tokens;
+    }, [tokens]);
+
     useEffect(() => {
         loadTokens();
+
+        const handleMyTokenUpdated = (data: any) => {
+            if (data.status === 'CALLED') {
+                // Check if this token belongs to the current patient
+                const patientToken = tokensRef.current.find(t => t.id === data.tokenId);
+                if (patientToken) {
+                    toast.success('Your Token has been called!', { duration: 5000 });
+                    setNotificationData({
+                        doctorName: patientToken.session?.doctor?.fullName || 'Doctor',
+                        tokenNumber: patientToken.tokenNo
+                    });
+                    setIsNotificationOpen(true);
+                }
+            }
+            loadTokens();
+        };
+
+        const handleQueueUpdate = () => {
+            loadTokens();
+        };
+
+        socketService.on('mytoken:updated', handleMyTokenUpdated);
+        ['token:next', 'token:booked', 'session:started', 'session:paused', 'session:resumed', 'session:ended'].forEach(event => {
+            socketService.on(event, handleQueueUpdate);
+        });
+
+        return () => {
+            socketService.off('mytoken:updated', handleMyTokenUpdated);
+            ['token:next', 'token:booked', 'session:started', 'session:paused', 'session:resumed', 'session:ended'].forEach(event => {
+                socketService.off(event, handleQueueUpdate);
+            });
+
+            // Leave all doctor rooms on unmount
+            const uniqueDoctorIds = [...new Set(tokensRef.current.map(t => t.session?.doctor?.id).filter(Boolean))];
+            uniqueDoctorIds.forEach(doctorId => {
+                if (doctorId) socketService.leaveDoctorRoom(doctorId.toString());
+            });
+        };
     }, []);
 
     const loadTokens = async () => {
@@ -25,6 +76,12 @@ export const PatientDashboard: React.FC = () => {
             const response = await api.getMyTokens();
             if (response.success && response.data) {
                 setTokens(response.data);
+
+                // Join doctor rooms for real-time queue updates
+                const uniqueDoctorIds = [...new Set(response.data.map((t: any) => t.session?.doctor?.id).filter(Boolean))];
+                uniqueDoctorIds.forEach(doctorId => {
+                    if (doctorId) socketService.joinDoctorRoom(doctorId.toString());
+                });
             }
         } catch (error) {
             console.error('Failed to load tokens:', error);
@@ -51,7 +108,16 @@ export const PatientDashboard: React.FC = () => {
         <div className="page-bg">
             <Sidebar userRole="patient" userName={user?.fullName} />
 
-            <div className="main-container">
+            <div className="main-container relative">
+
+                {/* Notification Modal Mount Point */}
+                <NotificationModal
+                    isOpen={isNotificationOpen}
+                    onClose={() => setIsNotificationOpen(false)}
+                    doctorName={notificationData?.doctorName || 'Doctor'}
+                    tokenNumber={notificationData?.tokenNumber || ''}
+                />
+
                 {/* Header */}
                 <div className="app-header animate-slide-down">
                     <div>

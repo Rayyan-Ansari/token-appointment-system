@@ -13,22 +13,22 @@ export interface SocketEvents {
     maxToken: number;
     startedAt: string;
   };
-  
+
   'session:paused': {
     doctorId: string;
     sessionId: string;
   };
-  
+
   'session:resumed': {
     doctorId: string;
     sessionId: string;
   };
-  
+
   'session:ended': {
     doctorId: string;
     sessionId: string;
   };
-  
+
   // Token events (broadcasted to doctor room)
   'token:booked': {
     doctorId: string;
@@ -38,19 +38,19 @@ export interface SocketEvents {
     maxToken: number;
     queueLength: number;
   };
-  
+
   'token:next': {
     doctorId: string;
     sessionId: string;
     currentToken: number;
   };
-  
+
   'token:served': {
     doctorId: string;
     sessionId: string;
     tokenNo: number;
   };
-  
+
   // Personal token events (sent to specific user)
   'mytoken:created': {
     tokenId: string;
@@ -59,7 +59,7 @@ export interface SocketEvents {
     tokenNo: number;
     tokensAhead: number;
   };
-  
+
   'mytoken:updated': {
     tokenId: string;
     status: string;
@@ -83,17 +83,35 @@ class SocketManager {
     this.io.on('connection', (socket) => {
       console.log(`Client connected: ${socket.id}`);
 
-      // Handle authentication
+      // Authenticate from handshake auth token right away if provided
+      const token = socket.handshake.auth?.token;
+      if (token) {
+        try {
+          const payload = verifyToken(token);
+          socket.data.user = payload;
+
+          // Join user-specific room
+          socket.join(`user:${payload.userId}`);
+
+          console.log(`User authenticated via handshake: ${payload.email} (${payload.role})`);
+          socket.emit('authenticated', { success: true, user: payload });
+        } catch (error) {
+          console.error('Invalid token in socket handshake');
+          socket.emit('authenticated', { success: false, message: 'Invalid token' });
+        }
+      }
+
+      // Handle authentication (fallback if client emits manually)
       socket.on('authenticate', (token: string) => {
         try {
           const payload = verifyToken(token);
           socket.data.user = payload;
-          
+
           // Join user-specific room
           socket.join(`user:${payload.userId}`);
-          
+
           console.log(`User authenticated: ${payload.email} (${payload.role})`);
-          
+
           socket.emit('authenticated', { success: true, user: payload });
         } catch (error) {
           socket.emit('authenticated', { success: false, message: 'Invalid token' });
@@ -122,8 +140,8 @@ class SocketManager {
 
   // Emit to doctor room (all clients watching this doctor)
   emitToDoctorRoom<T extends keyof SocketEvents>(
-    doctorId: string, 
-    event: T, 
+    doctorId: string,
+    event: T,
     data: SocketEvents[T]
   ) {
     if (!this.io) return;
@@ -132,8 +150,8 @@ class SocketManager {
 
   // Emit to specific user
   emitToUser<T extends keyof SocketEvents>(
-    userId: string, 
-    event: T, 
+    userId: string,
+    event: T,
     data: SocketEvents[T]
   ) {
     if (!this.io) return;
@@ -142,7 +160,7 @@ class SocketManager {
 
   // Broadcast to all connected clients
   broadcast<T extends keyof SocketEvents>(
-    event: T, 
+    event: T,
     data: SocketEvents[T]
   ) {
     if (!this.io) return;

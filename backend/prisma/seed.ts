@@ -10,10 +10,10 @@ async function main() {
 
   // Create default admin user
   const adminPassword = await bcrypt.hash('admin123!@#', SALT_ROUNDS);
-  
+
   const admin = await prisma.admin.upsert({
     where: { email: 'admin@tokenappointment.com' },
-    update: {},
+    update: { passwordHash: adminPassword },
     create: {
       email: 'admin@tokenappointment.com',
       passwordHash: adminPassword,
@@ -24,10 +24,10 @@ async function main() {
 
   // Create sample patients
   const patientPassword = await bcrypt.hash('patient123', SALT_ROUNDS);
-  
+
   const patient1 = await prisma.user.upsert({
     where: { email: 'john.doe@example.com' },
-    update: {},
+    update: { passwordHash: patientPassword },
     create: {
       email: 'john.doe@example.com',
       passwordHash: patientPassword,
@@ -41,7 +41,7 @@ async function main() {
 
   const patient2 = await prisma.user.upsert({
     where: { email: 'jane.smith@example.com' },
-    update: {},
+    update: { passwordHash: patientPassword },
     create: {
       email: 'jane.smith@example.com',
       passwordHash: patientPassword,
@@ -61,7 +61,7 @@ async function main() {
   // Approved doctor
   const doctor1 = await prisma.doctor.upsert({
     where: { email: 'dr.wilson@example.com' },
-    update: {},
+    update: { passwordHash: doctorPassword },
     create: {
       email: 'dr.wilson@example.com',
       passwordHash: doctorPassword,
@@ -91,7 +91,7 @@ async function main() {
   // Pending doctor
   const doctor2 = await prisma.doctor.upsert({
     where: { email: 'dr.johnson@example.com' },
-    update: {},
+    update: { passwordHash: doctorPassword },
     create: {
       email: 'dr.johnson@example.com',
       passwordHash: doctorPassword,
@@ -118,7 +118,7 @@ async function main() {
   // Another approved doctor
   const doctor3 = await prisma.doctor.upsert({
     where: { email: 'dr.patel@example.com' },
-    update: {},
+    update: { passwordHash: doctorPassword },
     create: {
       email: 'dr.patel@example.com',
       passwordHash: doctorPassword,

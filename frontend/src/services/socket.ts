@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
-import type { SocketTokenUpdate, SocketSessionUpdate } from '../types';
+import type { SocketTokenUpdate } from '../types';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || '';
 
 class SocketService {
     private socket: Socket | null = null;
@@ -36,8 +36,28 @@ class SocketService {
             this.emit('token:update', data);
         });
 
-        this.socket.on('session:update', (data: SocketSessionUpdate) => {
-            this.emit('session:update', data);
+        this.socket.on('token:booked', (data: any) => {
+            this.emit('token:booked', data);
+        });
+
+        this.socket.on('token:next', (data: any) => {
+            this.emit('token:next', data);
+        });
+
+        // Forwarding Session state changes
+        ['session:started', 'session:paused', 'session:resumed', 'session:ended'].forEach(event => {
+            this.socket?.on(event, (data: any) => {
+                this.emit(event, data);
+            });
+        });
+
+        // Patient specific token events
+        this.socket.on('mytoken:updated', (data: any) => {
+            this.emit('mytoken:updated', data);
+        });
+
+        this.socket.on('mytoken:created', (data: any) => {
+            this.emit('mytoken:created', data);
         });
     }
 
@@ -70,12 +90,12 @@ class SocketService {
         }
     }
 
-    joinSession(sessionId: string) {
-        this.socket?.emit('join:session', { sessionId });
+    joinDoctorRoom(doctorId: string) {
+        this.socket?.emit('join-doctor-room', doctorId);
     }
 
-    leaveSession(sessionId: string) {
-        this.socket?.emit('leave:session', { sessionId });
+    leaveDoctorRoom(doctorId: string) {
+        this.socket?.emit('leave-doctor-room', doctorId);
     }
 }
 
