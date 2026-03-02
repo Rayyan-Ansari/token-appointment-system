@@ -23,6 +23,9 @@ export const PatientDashboard: React.FC = () => {
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [notificationData, setNotificationData] = useState<{ doctorName: string; tokenNumber: number | string } | null>(null);
 
+    // Selected Token for Modal
+    const [selectedTokenDetails, setSelectedTokenDetails] = useState<Token | null>(null);
+
     // Keep a ref of tokens to access latest state inside socket callbacks without stale closures
     const tokensRef = useRef(tokens);
     useEffect(() => {
@@ -118,6 +121,106 @@ export const PatientDashboard: React.FC = () => {
                     tokenNumber={notificationData?.tokenNumber || ''}
                 />
 
+                {/* Token Details Modal */}
+                {selectedTokenDetails && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-fade-in">
+                        <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-up">
+                            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Appointment Details
+                                </h2>
+                                <button onClick={() => setSelectedTokenDetails(null)} className="text-gray-400 hover:text-gray-600 bg-white hover:bg-gray-100 p-1.5 rounded-xl transition-colors">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            <div className="p-5 overflow-y-auto max-h-[80vh]">
+                                <div className="flex items-center gap-4 mb-5 border border-blue-100 bg-blue-50/30 p-4 rounded-xl">
+                                    <Avatar name={selectedTokenDetails.session?.doctor?.fullName} size="xl" />
+                                    <div>
+                                        <h3 className="font-bold text-lg text-gray-900">{selectedTokenDetails.session?.doctor?.fullName || 'Doctor'}</h3>
+                                        <p className="text-blue-600 text-sm font-medium">{selectedTokenDetails.session?.doctor?.specialization}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-0.5">Your Token No</p>
+                                            <p className="font-bold text-gray-800 text-xl text-blue-600">#{selectedTokenDetails.tokenNo}</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-0.5">Booking Status</p>
+                                            <Badge variant={getStatusBadge(selectedTokenDetails.status).variant}>{getStatusBadge(selectedTokenDetails.status).label}</Badge>
+                                        </div>
+                                    </div>
+
+                                    {(selectedTokenDetails.status === 'WAITING' || selectedTokenDetails.status === 'CALLED') && (
+                                        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                                            <h4 className="text-sm font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                                Live Queue Status
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-white rounded-lg p-2.5 text-center shadow-sm border border-indigo-50">
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Now Serving</p>
+                                                    <p className="text-xl font-bold text-indigo-700">{selectedTokenDetails.session?.currentTokenNo || '-'}</p>
+                                                </div>
+                                                <div className="bg-white rounded-lg p-2.5 text-center shadow-sm border border-indigo-50">
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Tokens Ahead</p>
+                                                    <p className="text-xl font-bold text-gray-800">
+                                                        {selectedTokenDetails.session?.currentTokenNo
+                                                            ? Math.max(0, selectedTokenDetails.tokenNo - selectedTokenDetails.session.currentTokenNo)
+                                                            : '-'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="border border-gray-100 rounded-xl overflow-hidden">
+                                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-100">
+                                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Doctor Information</h4>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            <div className="flex items-start gap-3">
+                                                <span className="text-xl">🎓</span>
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Experience</p>
+                                                    <p className="text-sm font-medium text-gray-800">{selectedTokenDetails.session?.doctor?.yearsExperience || 0}+ Years</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <span className="text-xl">✉️</span>
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Contact Email</p>
+                                                    <p className="text-sm font-medium text-gray-800 break-all">{(selectedTokenDetails.session?.doctor as any)?.user?.email || selectedTokenDetails.session?.doctor?.email || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <span className="text-xl">🏥</span>
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Clinic Address</p>
+                                                    <p className="text-sm font-medium text-gray-800">
+                                                        {(selectedTokenDetails.session?.doctor as any)?.address || 'Address not provided'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                <button onClick={() => setSelectedTokenDetails(null)} className="btn-primary">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="app-header animate-slide-down">
                     <div>
@@ -212,7 +315,11 @@ export const PatientDashboard: React.FC = () => {
                                     {tokens.map((token) => {
                                         const statusInfo = getStatusBadge(token.status);
                                         return (
-                                            <div key={token.id} className="app-card app-card-hover animate-slide-up flex items-center gap-4">
+                                            <div
+                                                key={token.id}
+                                                onClick={() => setSelectedTokenDetails(token)}
+                                                className="app-card app-card-hover animate-slide-up flex items-center gap-4 cursor-pointer"
+                                            >
                                                 <div className={`token-badge ${token.status === 'SERVED' ? 'token-badge-green' : token.status === 'CALLED' ? 'token-badge-purple' : 'token-badge-blue'}`}>
                                                     <span className="text-[10px]">Token</span>
                                                     <span className="text-sm">#{token.tokenNo}</span>

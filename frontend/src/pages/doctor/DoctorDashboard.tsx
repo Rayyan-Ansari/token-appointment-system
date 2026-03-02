@@ -8,6 +8,7 @@ import { Sidebar } from '../../components/layout/Sidebar';
 import { Badge } from '../../components/ui/Badge';
 import { Avatar } from '../../components/ui/Avatar';
 import { Spinner } from '../../components/ui/Spinner';
+import { PatientDetailsModal } from '../../components/doctor/PatientDetailsModal';
 
 export const DoctorDashboard: React.FC = () => {
     const { user, logout } = useAuth();
@@ -15,6 +16,7 @@ export const DoctorDashboard: React.FC = () => {
     const [tokens, setTokens] = useState<Token[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [selectedToken, setSelectedToken] = useState<Token | null>(null);
 
     useEffect(() => {
         loadSession();
@@ -247,7 +249,11 @@ export const DoctorDashboard: React.FC = () => {
                     ) : (
                         <div className="space-y-2 custom-scrollbar" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             {todayTokens.slice().reverse().map((token) => (
-                                <div key={token.id} className="app-card app-card-hover flex items-center justify-between">
+                                <div
+                                    key={token.id}
+                                    className="app-card app-card-hover flex items-center justify-between cursor-pointer"
+                                    onClick={() => setSelectedToken(token)}
+                                >
                                     <div className="flex items-center gap-3">
                                         <div className={`token-badge ${token.status === 'SERVED' ? 'token-badge-green' : token.status === 'CALLED' ? 'token-badge-purple' : 'token-badge-blue'}`}>
                                             <span className="text-[10px]">Token</span>
@@ -294,6 +300,14 @@ export const DoctorDashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Patient Details Modal */}
+            {selectedToken && (
+                <PatientDetailsModal
+                    token={selectedToken}
+                    onClose={() => setSelectedToken(null)}
+                />
+            )}
         </div>
     );
 };

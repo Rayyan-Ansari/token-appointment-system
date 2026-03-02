@@ -350,7 +350,11 @@ class TokenService {
           select: {
             id: true,
             fullName: true,
-            phone: true
+            phone: true,
+            email: true,
+            dob: true,
+            sex: true,
+            address: true
           }
         }
       },
@@ -371,7 +375,11 @@ class TokenService {
       patient: {
         id: token.patient.id.toString(),
         fullName: token.patient.fullName,
-        phone: token.patient.phone
+        phone: token.patient.phone,
+        email: token.patient.email,
+        dob: token.patient.dob ? token.patient.dob.toISOString().split('T')[0] : undefined,
+        sex: token.patient.sex,
+        address: token.patient.address
       }
     }));
   }
