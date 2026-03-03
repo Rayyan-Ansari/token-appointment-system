@@ -14,7 +14,7 @@ datasource db {
 // Admin users
 model Admin {
   id           BigInt    @id @default(autoincrement())
-  email        String    @unique @db.Citext
+  email        String    @unique
   passwordHash String    @map("password_hash")
   fullName     String    @map("full_name")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -28,7 +28,7 @@ model Admin {
 // Patient users
 model User {
   id           BigInt    @id @default(autoincrement())
-  email        String    @unique @db.Citext
+  email        String    @unique
   passwordHash String    @map("password_hash")
   fullName     String    @map("full_name")
   phone        String
@@ -47,7 +47,7 @@ model User {
 // Doctor users
 model Doctor {
   id                   BigInt    @id @default(autoincrement())
-  email                String    @unique @db.Citext
+  email                String    @unique
   passwordHash         String    @map("password_hash")
   fullName             String    @map("full_name")
   phone                String
