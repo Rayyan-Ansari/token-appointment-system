@@ -86,7 +86,7 @@ class AuthService {
       const filePath = path.join(licensesDir, filename);
 
       // Save file
-      await fs.writeFile(filePath, licenseFile.buffer);
+      await fs.writeFile(filePath, new Uint8Array(licenseFile.buffer));
       licenseDocumentPath = `licenses/${filename}`;
     }
 
