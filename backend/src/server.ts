@@ -55,7 +55,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Start server
-httpServer.listen(PORT, () => {
+httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`
 🚀 Server is running!
 📍 Environment: ${NODE_ENV}
