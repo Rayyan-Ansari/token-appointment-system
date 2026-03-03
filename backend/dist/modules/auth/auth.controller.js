@@ -112,6 +112,29 @@ class AuthController {
             });
         }
     }
+    async updateProfile(req, res) {
+        try {
+            if (!req.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            }
+            const data = (0, validators_1.validateRequest)(validators_1.updateProfileSchema)(req.body);
+            const result = await auth_service_1.authService.updateProfile(req.user.userId, req.user.role, data);
+            res.json({
+                success: true,
+                message: 'Profile updated successfully',
+                data: result
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message || 'Failed to update profile'
+            });
+        }
+    }
 }
 exports.authController = new AuthController();
 //# sourceMappingURL=auth.controller.js.map

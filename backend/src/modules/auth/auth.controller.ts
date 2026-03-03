@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '@/lib/auth';
 import { authService } from './auth.service';
-import { 
-  validateRequest, 
-  patientRegisterSchema, 
-  doctorRegisterSchema, 
-  loginSchema 
+import {
+  validateRequest,
+  patientRegisterSchema,
+  doctorRegisterSchema,
+  loginSchema,
+  updateProfileSchema
 } from '@/lib/validators';
 
 class AuthController {
@@ -14,7 +15,7 @@ class AuthController {
     try {
       const data = validateRequest(patientRegisterSchema)(req.body);
       const result = await authService.registerPatient(data);
-      
+
       res.status(201).json({
         success: true,
         message: 'Patient registered successfully',
@@ -33,9 +34,9 @@ class AuthController {
     try {
       const data = validateRequest(doctorRegisterSchema)(req.body);
       const licenseFile = req.file;
-      
+
       const result = await authService.registerDoctor(data, licenseFile);
-      
+
       res.status(201).json({
         success: true,
         message: 'Doctor registered successfully. Pending admin approval.',
@@ -54,7 +55,7 @@ class AuthController {
     try {
       const data = validateRequest(loginSchema)(req.body);
       const result = await authService.loginPatient(data);
-      
+
       res.json({
         success: true,
         message: 'Login successful',
@@ -73,7 +74,7 @@ class AuthController {
     try {
       const data = validateRequest(loginSchema)(req.body);
       const result = await authService.loginDoctor(data);
-      
+
       res.json({
         success: true,
         message: 'Login successful',
@@ -92,7 +93,7 @@ class AuthController {
     try {
       const data = validateRequest(loginSchema)(req.body);
       const result = await authService.loginAdmin(data);
-      
+
       res.json({
         success: true,
         message: 'Login successful',
@@ -117,7 +118,7 @@ class AuthController {
       }
 
       const result = await authService.getUserProfile(req.user.userId, req.user.role);
-      
+
       res.json({
         success: true,
         message: 'Profile retrieved successfully',
@@ -127,6 +128,32 @@ class AuthController {
       res.status(400).json({
         success: false,
         message: error.message || 'Failed to get profile'
+      });
+    }
+  }
+
+  // Update user profile
+  async updateProfile(req: AuthRequest, res: Response) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+      }
+
+      const data = validateRequest(updateProfileSchema)(req.body);
+      const result = await authService.updateProfile(req.user.userId, req.user.role, data);
+
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        data: result
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to update profile'
       });
     }
   }

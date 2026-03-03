@@ -23,8 +23,8 @@ app.use((0, cors_1.default)({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 const limiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 5 * 60 * 1000,
+    max: 500,
     message: {
         success: false,
         message: 'Too many requests from this IP, please try again later.'
@@ -34,7 +34,7 @@ const limiter = (0, express_rate_limit_1.default)({
 });
 const authLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 100,
     message: {
         success: false,
         message: 'Too many authentication attempts, please try again later.'

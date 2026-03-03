@@ -19,4 +19,5 @@ router.get('/doctors', admin_controller_1.adminController.getAllDoctors);
 router.delete('/doctors/:id', admin_controller_1.adminController.deleteDoctor);
 router.get('/patients', admin_controller_1.adminController.getAllPatients);
 router.delete('/patients/:id', admin_controller_1.adminController.deletePatient);
+router.get('/tokens', admin_controller_1.adminController.getAllTokens);
 //# sourceMappingURL=admin.routes.js.map

@@ -37,6 +37,8 @@ class DoctorController {
                     specialization: true,
                     yearsExperience: true,
                     qualification: true,
+                    workingHoursStart: true,
+                    workingHoursEnd: true,
                     isActive: true
                 },
                 skip: (query.page - 1) * query.limit,
@@ -104,6 +106,8 @@ class DoctorController {
                     specialization: true,
                     qualification: true,
                     yearsExperience: true,
+                    workingHoursStart: true,
+                    workingHoursEnd: true,
                     isActive: true,
                     approvals: {
                         select: {

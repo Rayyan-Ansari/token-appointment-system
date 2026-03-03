@@ -84,6 +84,25 @@ declare class TokenService {
         };
         myToken: any;
     }>;
+    getSessionTokens(sessionId: string): Promise<{
+        id: string;
+        tokenNo: number;
+        status: import(".prisma/client").$Enums.TokenStatus;
+        bookedAt: Date;
+        calledAt: Date;
+        servedAt: Date;
+        canceledAt: Date;
+        noShowAt: Date;
+        patient: {
+            id: string;
+            fullName: string;
+            phone: string;
+            email: string;
+            dob: string;
+            sex: import(".prisma/client").$Enums.Sex;
+            address: string;
+        };
+    }[]>;
 }
 export declare const tokenService: TokenService;
 export {};

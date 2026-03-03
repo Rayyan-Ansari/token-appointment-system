@@ -140,5 +140,22 @@ export const adminController = {
                 message: error.message || 'Failed to delete patient'
             });
         }
+    },
+
+    // Get all token transactions
+    async getAllTokens(req: Request, res: Response) {
+        try {
+            const result = await adminService.getAllTokens();
+            res.json({
+                success: true,
+                message: 'Tokens retrieved successfully',
+                data: result
+            });
+        } catch (error: any) {
+            res.status(400).json({
+                success: false,
+                message: error.message || 'Failed to get token transactions'
+            });
+        }
     }
 };

@@ -210,6 +210,22 @@ export const BookAppointment: React.FC = () => {
                                                 </div>
                                             </div>
 
+                                            {selectedDoctor.workingHoursStart && selectedDoctor.workingHoursEnd && (
+                                                <div className="flex items-start gap-2.5 sm:col-span-2">
+                                                    <div className="mt-0.5 bg-yellow-100 p-1 rounded text-yellow-600">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-gray-500">Working Hours</p>
+                                                        <p className="text-sm font-medium text-gray-800">
+                                                            {new Date(`1970-01-01T${selectedDoctor.workingHoursStart}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {' - '}
+                                                            {new Date(`1970-01-01T${selectedDoctor.workingHoursEnd}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             <div className="flex items-start gap-2.5">
                                                 <div className="mt-0.5 bg-green-100 p-1 rounded text-green-600">
                                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

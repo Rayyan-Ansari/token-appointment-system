@@ -8,5 +8,6 @@ export declare const adminController: {
     deleteDoctor(req: Request, res: Response): Promise<void>;
     getAllPatients(req: Request, res: Response): Promise<void>;
     deletePatient(req: Request, res: Response): Promise<void>;
+    getAllTokens(req: Request, res: Response): Promise<void>;
 };
 //# sourceMappingURL=admin.controller.d.ts.map

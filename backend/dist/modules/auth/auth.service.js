@@ -259,6 +259,8 @@ class AuthService {
                         licenseNumber: true,
                         licenseDocumentPath: true,
                         isActive: true,
+                        workingHoursStart: true,
+                        workingHoursEnd: true,
                         createdAt: true,
                         approvals: {
                             select: {
@@ -292,6 +294,57 @@ class AuthService {
             default:
                 throw new Error('Invalid role');
         }
+    }
+    async updateProfile(userId, role, data) {
+        const id = BigInt(userId);
+        let currentRecord = null;
+        if (role === 'patient') {
+            currentRecord = await db_1.prisma.user.findUnique({ where: { id } });
+        }
+        else if (role === 'doctor') {
+            currentRecord = await db_1.prisma.doctor.findUnique({ where: { id } });
+        }
+        else {
+            throw new Error('Profile updates only supported for patients and doctors');
+        }
+        if (!currentRecord)
+            throw new Error('User not found');
+        const updateData = {};
+        if (data.fullName)
+            updateData.fullName = data.fullName;
+        if (data.email)
+            updateData.email = data.email;
+        if (data.phone)
+            updateData.phone = data.phone;
+        if (role === 'doctor') {
+            if (data.workingHoursStart !== undefined)
+                updateData.workingHoursStart = data.workingHoursStart;
+            if (data.workingHoursEnd !== undefined)
+                updateData.workingHoursEnd = data.workingHoursEnd;
+        }
+        if (data.newPassword) {
+            if (!data.currentPassword) {
+                throw new Error('Current password is required to set a new password');
+            }
+            const isPasswordValid = await (0, auth_1.comparePassword)(data.currentPassword, currentRecord.passwordHash);
+            if (!isPasswordValid) {
+                throw new Error('Current password is incorrect');
+            }
+            updateData.passwordHash = await (0, auth_1.hashPassword)(data.newPassword);
+        }
+        if (role === 'patient') {
+            await db_1.prisma.user.update({
+                where: { id },
+                data: updateData
+            });
+        }
+        else if (role === 'doctor') {
+            await db_1.prisma.doctor.update({
+                where: { id },
+                data: updateData
+            });
+        }
+        return { success: true };
     }
 }
 exports.authService = new AuthService();

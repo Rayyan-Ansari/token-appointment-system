@@ -31,11 +31,14 @@ export declare const adminService: {
         email: string;
         fullName: string;
         phone: string;
+        dob: Date;
+        sex: import(".prisma/client").$Enums.Sex;
         qualification: string;
         specialization: string;
         yearsExperience: number;
         licenseNumber: string;
         createdAt: Date;
+        licenseDocumentPath: string;
     }[]>;
     deleteDoctor(doctorId: string): Promise<{
         success: boolean;
@@ -45,10 +48,41 @@ export declare const adminService: {
         email: string;
         fullName: string;
         phone: string;
+        dob: Date;
+        sex: import(".prisma/client").$Enums.Sex;
+        address: string;
         createdAt: Date;
     }[]>;
     deletePatient(patientId: string): Promise<{
         success: boolean;
     }>;
+    getAllTokens(): Promise<{
+        id: string;
+        tokenNo: number;
+        status: import(".prisma/client").$Enums.TokenStatus;
+        bookedAt: Date;
+        calledAt: Date;
+        servedAt: Date;
+        canceledAt: Date;
+        noShowAt: Date;
+        patient: {
+            id: string;
+            fullName: string;
+            email: string;
+            phone: string;
+        };
+        doctor: {
+            id: string;
+            fullName: string;
+            specialization: string;
+        };
+        session: {
+            id: string;
+            sessionDate: Date;
+            status: import(".prisma/client").$Enums.SessionStatus;
+            currentTokenNo: number;
+            maxTokenNo: number;
+        };
+    }[]>;
 };
 //# sourceMappingURL=admin.service.d.ts.map

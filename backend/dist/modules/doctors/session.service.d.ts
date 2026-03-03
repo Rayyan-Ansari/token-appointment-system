@@ -31,11 +31,21 @@ declare class SessionService {
             maxToken: number;
             status: "ACTIVE";
         };
+        message: string;
+        calledToken?: undefined;
+    } | {
+        session: {
+            id: string;
+            currentToken: number;
+            maxToken: number;
+            status: "ACTIVE";
+        };
         calledToken: {
             id: string;
             tokenNo: number;
             patientName: string;
         };
+        message?: undefined;
     }>;
     endSession(doctorId: string): Promise<{
         session: {

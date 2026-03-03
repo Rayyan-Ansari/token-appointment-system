@@ -280,6 +280,49 @@ class TokenService {
             myToken
         };
     }
+    async getSessionTokens(sessionId) {
+        const sessionIdBigInt = BigInt(sessionId);
+        const tokens = await db_1.prisma.token.findMany({
+            where: {
+                sessionId: sessionIdBigInt
+            },
+            include: {
+                patient: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        phone: true,
+                        email: true,
+                        dob: true,
+                        sex: true,
+                        address: true
+                    }
+                }
+            },
+            orderBy: {
+                tokenNo: 'asc'
+            }
+        });
+        return tokens.map(token => ({
+            id: token.id.toString(),
+            tokenNo: token.tokenNo,
+            status: token.status,
+            bookedAt: token.bookedAt,
+            calledAt: token.calledAt,
+            servedAt: token.servedAt,
+            canceledAt: token.canceledAt,
+            noShowAt: token.noShowAt,
+            patient: {
+                id: token.patient.id.toString(),
+                fullName: token.patient.fullName,
+                phone: token.patient.phone,
+                email: token.patient.email,
+                dob: token.patient.dob ? token.patient.dob.toISOString().split('T')[0] : undefined,
+                sex: token.patient.sex,
+                address: token.patient.address
+            }
+        }));
+    }
 }
 exports.tokenService = new TokenService();
 //# sourceMappingURL=token.service.js.map

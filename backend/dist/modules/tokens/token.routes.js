@@ -10,7 +10,7 @@ const auth_1 = require("@/lib/auth");
 const router = express_1.default.Router();
 exports.tokenRoutes = router;
 router.use(auth_1.authMiddleware);
-router.use(auth_1.requirePatient);
-router.post('/book', token_controller_1.tokenController.bookToken);
-router.get('/my', token_controller_1.tokenController.getMyTokens);
+router.post('/book', auth_1.requirePatient, token_controller_1.tokenController.bookToken);
+router.get('/my', auth_1.requirePatient, token_controller_1.tokenController.getMyTokens);
+router.get('/session/:sessionId', token_controller_1.tokenController.getSessionTokens);
 //# sourceMappingURL=token.routes.js.map

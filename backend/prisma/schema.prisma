@@ -58,6 +58,8 @@ model Doctor {
   licenseNumber        String    @map("license_number")
   licenseDocumentPath  String?   @map("license_document_path")
   isActive             Boolean   @default(false) @map("is_active")
+  workingHoursStart    String?   @map("working_hours_start")
+  workingHoursEnd      String?   @map("working_hours_end")
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
   // Relations

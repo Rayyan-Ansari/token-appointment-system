@@ -24,4 +24,7 @@ router.delete('/doctors/:id', adminController.deleteDoctor);
 router.get('/patients', adminController.getAllPatients);
 router.delete('/patients/:id', adminController.deletePatient);
 
+// Token management
+router.get('/tokens', adminController.getAllTokens);
+
 export { router as adminRoutes };

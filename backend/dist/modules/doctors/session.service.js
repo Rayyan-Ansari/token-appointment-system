@@ -184,10 +184,59 @@ class SessionService {
             if (session.status !== 'ACTIVE') {
                 throw new Error('Session is not active');
             }
-            const nextTokenNo = session.currentTokenNo + 1;
-            if (nextTokenNo > session.maxTokenNo) {
-                throw new Error('No more tokens to call');
+            let currentTokenMarkedAsServed = false;
+            if (session.currentTokenNo > 0) {
+                const currentToken = await tx.token.findFirst({
+                    where: {
+                        sessionId: session.id,
+                        tokenNo: session.currentTokenNo,
+                        status: 'CALLED'
+                    },
+                    include: {
+                        patient: {
+                            select: {
+                                id: true,
+                                fullName: true
+                            }
+                        }
+                    }
+                });
+                if (currentToken) {
+                    await tx.token.update({
+                        where: { id: currentToken.id },
+                        data: {
+                            status: 'SERVED',
+                            servedAt: new Date()
+                        }
+                    });
+                    currentTokenMarkedAsServed = true;
+                    await tx.tokenLog.create({
+                        data: {
+                            tokenId: currentToken.id,
+                            sessionId: session.id,
+                            doctorId: doctorIdBigInt,
+                            patientId: currentToken.patient.id,
+                            action: 'SERVED',
+                            meta: {
+                                tokenNo: currentToken.tokenNo,
+                                patientName: currentToken.patient.fullName,
+                                servedAt: new Date().toISOString()
+                            }
+                        }
+                    });
+                    socket_1.socketManager.emitToUser(currentToken.patient.id.toString(), 'mytoken:updated', {
+                        tokenId: currentToken.id.toString(),
+                        status: 'SERVED',
+                        servedAt: new Date().toISOString()
+                    });
+                    socket_1.socketManager.emitToDoctorRoom(doctorId, 'token:served', {
+                        doctorId,
+                        sessionId: session.id.toString(),
+                        tokenNo: currentToken.tokenNo
+                    });
+                }
             }
+            const nextTokenNo = session.currentTokenNo + 1;
             const token = await tx.token.findFirst({
                 where: {
                     sessionId: session.id,
@@ -225,6 +274,17 @@ class SessionService {
                     }
                 });
                 if (!nextAvailableToken) {
+                    if (currentTokenMarkedAsServed) {
+                        return {
+                            session: {
+                                id: session.id.toString(),
+                                currentToken: session.currentTokenNo,
+                                maxToken: session.maxTokenNo,
+                                status: session.status
+                            },
+                            message: 'Current token marked as SERVED. No more waiting tokens.'
+                        };
+                    }
                     throw new Error('No waiting tokens found');
                 }
                 const calledToken = await tx.token.update({

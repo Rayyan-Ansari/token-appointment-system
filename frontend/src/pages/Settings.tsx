@@ -18,7 +18,9 @@ export const Settings: React.FC = () => {
         phone: (user as any)?.phone || '',
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        workingHoursStart: (user as any)?.workingHoursStart || '',
+        workingHoursEnd: (user as any)?.workingHoursEnd || ''
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +52,10 @@ export const Settings: React.FC = () => {
                 updateData.currentPassword = formData.currentPassword;
                 updateData.newPassword = formData.newPassword;
             }
+            if (user?.role === 'doctor') {
+                updateData.workingHoursStart = formData.workingHoursStart;
+                updateData.workingHoursEnd = formData.workingHoursEnd;
+            }
 
             const response = await api.updateProfile(updateData);
             if (response.success) {
@@ -73,7 +79,9 @@ export const Settings: React.FC = () => {
             phone: (user as any)?.phone || '',
             currentPassword: '',
             newPassword: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            workingHoursStart: (user as any)?.workingHoursStart || '',
+            workingHoursEnd: (user as any)?.workingHoursEnd || ''
         });
     };
 
@@ -183,6 +191,67 @@ export const Settings: React.FC = () => {
                                             placeholder="Enter phone number"
                                         />
                                     ) : readonlyField((user as any)?.phone || 'Not provided')}
+                                </div>
+                            )}
+
+                            {/* Date of Birth and Sex (patient/doctor only) */}
+                            {(user?.role === 'patient' || user?.role === 'doctor') && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-gray-500 text-xs font-medium mb-1.5 uppercase tracking-wide">
+                                            Date of Birth
+                                        </label>
+                                        {readonlyField(
+                                            (user as any)?.dob
+                                                ? new Date((user as any).dob).toLocaleDateString()
+                                                : 'Not provided'
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-500 text-xs font-medium mb-1.5 uppercase tracking-wide">
+                                            Gender
+                                        </label>
+                                        {readonlyField(
+                                            (user as any)?.sex === 'M' ? 'Male'
+                                                : (user as any)?.sex === 'F' ? 'Female'
+                                                    : (user as any)?.sex === 'O' ? 'Other'
+                                                        : 'Not provided'
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Working Hours (doctor only) */}
+                            {user?.role === 'doctor' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-gray-500 text-xs font-medium mb-1.5 uppercase tracking-wide">
+                                            Working Hours Start
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="time"
+                                                name="workingHoursStart"
+                                                value={formData.workingHoursStart}
+                                                onChange={handleInputChange}
+                                                className={inputClass}
+                                            />
+                                        ) : readonlyField(formData.workingHoursStart)}
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-500 text-xs font-medium mb-1.5 uppercase tracking-wide">
+                                            Working Hours End
+                                        </label>
+                                        {isEditing ? (
+                                            <input
+                                                type="time"
+                                                name="workingHoursEnd"
+                                                value={formData.workingHoursEnd}
+                                                onChange={handleInputChange}
+                                                className={inputClass}
+                                            />
+                                        ) : readonlyField(formData.workingHoursEnd)}
+                                    </div>
                                 </div>
                             )}
 

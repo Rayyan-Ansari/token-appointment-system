@@ -1,4 +1,4 @@
-import { PatientRegisterInput, DoctorRegisterInput, LoginInput } from '@/lib/validators';
+import { PatientRegisterInput, DoctorRegisterInput, LoginInput, UpdateProfileInput } from '@/lib/validators';
 declare class AuthService {
     registerPatient(data: PatientRegisterInput): Promise<{
         user: {
@@ -96,6 +96,8 @@ declare class AuthService {
             specialization: string;
             yearsExperience: number;
             licenseNumber: string;
+            workingHoursStart: string;
+            workingHoursEnd: string;
             id: bigint;
             createdAt: Date;
             licenseDocumentPath: string;
@@ -119,6 +121,9 @@ declare class AuthService {
         role: "admin";
         user?: undefined;
         doctor?: undefined;
+    }>;
+    updateProfile(userId: string, role: string, data: UpdateProfileInput): Promise<{
+        success: boolean;
     }>;
 }
 export declare const authService: AuthService;

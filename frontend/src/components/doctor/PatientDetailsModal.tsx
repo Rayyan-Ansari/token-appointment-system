@@ -34,8 +34,8 @@ export const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({ token,
                             <h4 className="text-xl font-bold text-gray-900">{patient.fullName}</h4>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${token.status === 'SERVED' ? 'bg-green-100 text-green-700' :
-                                        token.status === 'CALLED' ? 'bg-purple-100 text-purple-700' :
-                                            'bg-blue-100 text-blue-700'
+                                    token.status === 'CALLED' ? 'bg-purple-100 text-purple-700' :
+                                        'bg-blue-100 text-blue-700'
                                     }`}>
                                     Token {token.tokenNo}
                                 </span>
@@ -62,24 +62,6 @@ export const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({ token,
 
                         <div className="pt-4 border-t border-gray-100 space-y-3">
                             <h5 className="text-sm font-bold text-gray-700">Contact Information</h5>
-
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                </div>
-                                <div className="text-sm text-gray-800">{patient.phone || '-'}</div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div className="text-sm text-gray-800">{patient.email || '-'}</div>
-                            </div>
 
                             <div className="flex gap-3">
                                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">

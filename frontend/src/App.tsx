@@ -14,6 +14,7 @@ import { PatientDashboard } from './pages/patient/PatientDashboard';
 import { BookAppointment } from './pages/patient/BookAppointment';
 import { DoctorDashboard } from './pages/doctor/DoctorDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { AdminTokenTransactions } from './pages/admin/AdminTokenTransactions';
 import { Settings } from './pages/Settings';
 
 // Components
@@ -89,6 +90,14 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/tokens"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminTokenTransactions />
           </ProtectedRoute>
         }
       />

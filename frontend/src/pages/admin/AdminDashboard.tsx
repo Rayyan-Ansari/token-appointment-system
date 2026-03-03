@@ -417,6 +417,7 @@ export const AdminDashboard: React.FC = () => {
         { label: 'Total Doctors', value: stats.activeDoctors, icon: '👨‍⚕️', color: 'blue', onClick: () => setActiveTab('doctors') },
         { label: 'Pending Approvals', value: stats.pendingApprovals, icon: '⏳', color: 'amber', onClick: () => setActiveTab('approvals') },
         { label: 'Total Patients', value: stats.totalPatients, icon: '👥', color: 'purple', onClick: () => setActiveTab('patients') },
+        { label: 'Token Transactions', value: 'Live', icon: '🎫', color: 'green', onClick: () => window.location.href = '/admin/tokens' },
     ];
 
     return (
@@ -471,7 +472,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
                     {statItems.map((item) => (
                         <div
                             key={item.label}
@@ -479,11 +480,15 @@ export const AdminDashboard: React.FC = () => {
                             className="app-card app-card-hover flex items-center gap-4 cursor-pointer"
                         >
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${item.color === 'blue' ? 'bg-blue-100' :
-                                item.color === 'amber' ? 'bg-amber-100' : 'bg-purple-100'
+                                    item.color === 'amber' ? 'bg-amber-100' :
+                                        item.color === 'green' ? 'bg-green-100' :
+                                            'bg-purple-100'
                                 }`}>{item.icon}</div>
                             <div className="flex-1">
                                 <div className={`text-2xl font-bold ${item.color === 'blue' ? 'text-blue-600' :
-                                    item.color === 'amber' ? 'text-amber-600' : 'text-purple-600'
+                                        item.color === 'amber' ? 'text-amber-600' :
+                                            item.color === 'green' ? 'text-green-600' :
+                                                'text-purple-600'
                                     }`}>{item.value}</div>
                                 <div className="text-gray-500 text-sm">{item.label}</div>
                             </div>

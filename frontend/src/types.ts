@@ -23,6 +23,8 @@ export interface Doctor {
   licenseNumber: string;
   licenseDocumentPath?: string;
   isActive: boolean;
+  workingHoursStart?: string;
+  workingHoursEnd?: string;
   createdAt: string;
 }
 
@@ -85,6 +87,35 @@ export interface Token {
   noShowAt?: string;
   session?: Session;
   patient?: User;
+}
+
+export interface TokenTransaction {
+  id: string;
+  tokenNo: number;
+  status: TokenStatus;
+  bookedAt: string;
+  calledAt?: string;
+  servedAt?: string;
+  canceledAt?: string;
+  noShowAt?: string;
+  patient: {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+  };
+  doctor: {
+    id: string;
+    fullName: string;
+    specialization: string;
+  };
+  session: {
+    id: string;
+    sessionDate: string;
+    status: SessionStatus;
+    currentTokenNo: number;
+    maxTokenNo: number;
+  };
 }
 
 // Approval Types

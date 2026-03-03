@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateRequest = exports.approveRejectDoctorSchema = exports.adminDoctorsListSchema = exports.sessionAnalyticsSchema = exports.myTokensSchema = exports.bookTokenSchema = exports.doctorsListSchema = exports.loginSchema = exports.doctorRegisterSchema = exports.patientRegisterSchema = exports.phoneSchema = exports.passwordSchema = exports.emailSchema = exports.sexSchema = void 0;
+exports.validateRequest = exports.approveRejectDoctorSchema = exports.adminDoctorsListSchema = exports.sessionAnalyticsSchema = exports.myTokensSchema = exports.bookTokenSchema = exports.doctorsListSchema = exports.updateProfileSchema = exports.loginSchema = exports.doctorRegisterSchema = exports.patientRegisterSchema = exports.phoneSchema = exports.passwordSchema = exports.emailSchema = exports.sexSchema = void 0;
 const zod_1 = require("zod");
 exports.sexSchema = zod_1.z.enum(['M', 'F', 'O']);
 exports.emailSchema = zod_1.z.string().email().toLowerCase().trim();
@@ -30,6 +30,15 @@ exports.doctorRegisterSchema = zod_1.z.object({
 exports.loginSchema = zod_1.z.object({
     email: exports.emailSchema,
     password: zod_1.z.string().min(1, 'Password is required'),
+});
+exports.updateProfileSchema = zod_1.z.object({
+    fullName: zod_1.z.string().min(2, 'Full name must be at least 2 characters').trim().optional(),
+    email: zod_1.z.string().email().toLowerCase().trim().optional(),
+    phone: zod_1.z.string().min(10, 'Phone number must be at least 10 digits').optional(),
+    currentPassword: zod_1.z.string().optional(),
+    newPassword: zod_1.z.string().min(8, 'Password must be at least 8 characters').optional(),
+    workingHoursStart: zod_1.z.string().optional(),
+    workingHoursEnd: zod_1.z.string().optional(),
 });
 exports.doctorsListSchema = zod_1.z.object({
     approved: zod_1.z.string().optional().default('true'),

@@ -72,6 +72,31 @@ export declare const loginSchema: z.ZodObject<{
     email?: string;
     password?: string;
 }>;
+export declare const updateProfileSchema: z.ZodObject<{
+    fullName: z.ZodOptional<z.ZodString>;
+    email: z.ZodOptional<z.ZodString>;
+    phone: z.ZodOptional<z.ZodString>;
+    currentPassword: z.ZodOptional<z.ZodString>;
+    newPassword: z.ZodOptional<z.ZodString>;
+    workingHoursStart: z.ZodOptional<z.ZodString>;
+    workingHoursEnd: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    email?: string;
+    fullName?: string;
+    phone?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    workingHoursStart?: string;
+    workingHoursEnd?: string;
+}, {
+    email?: string;
+    fullName?: string;
+    phone?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    workingHoursStart?: string;
+    workingHoursEnd?: string;
+}>;
 export declare const doctorsListSchema: z.ZodObject<{
     approved: z.ZodDefault<z.ZodOptional<z.ZodString>>;
     name: z.ZodOptional<z.ZodString>;
@@ -142,6 +167,7 @@ export declare const validateRequest: <T>(schema: z.ZodSchema<T>) => (data: unkn
 export type PatientRegisterInput = z.infer<typeof patientRegisterSchema>;
 export type DoctorRegisterInput = z.infer<typeof doctorRegisterSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type DoctorsListQuery = z.infer<typeof doctorsListSchema>;
 export type BookTokenInput = z.infer<typeof bookTokenSchema>;
 export type MyTokensQuery = z.infer<typeof myTokensSchema>;

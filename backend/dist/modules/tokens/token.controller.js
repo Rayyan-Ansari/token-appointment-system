@@ -50,6 +50,29 @@ class TokenController {
             });
         }
     }
+    async getSessionTokens(req, res) {
+        try {
+            if (!req.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            }
+            const { sessionId } = req.params;
+            const result = await token_service_1.tokenService.getSessionTokens(sessionId);
+            res.json({
+                success: true,
+                message: 'Session tokens retrieved successfully',
+                data: result
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message || 'Failed to get session tokens'
+            });
+        }
+    }
 }
 exports.tokenController = new TokenController();
 //# sourceMappingURL=token.controller.js.map

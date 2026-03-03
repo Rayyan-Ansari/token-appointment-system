@@ -7,6 +7,7 @@ declare class AuthController {
     loginDoctor(req: Request, res: Response): Promise<void>;
     loginAdmin(req: Request, res: Response): Promise<void>;
     getMe(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
+    updateProfile(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>>>;
 }
 export declare const authController: AuthController;
 export {};

@@ -12,7 +12,8 @@ import type {
     DoctorApproval,
     AdminStats,
     DoctorDetails,
-    PatientDetails
+    PatientDetails,
+    TokenTransaction
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
@@ -192,6 +193,11 @@ class ApiClient {
 
     async deletePatient(patientId: string): Promise<ApiResponse> {
         const response = await this.client.delete<ApiResponse>(`/api/admin/patients/${patientId}`);
+        return response.data;
+    }
+
+    async getAllTokens(): Promise<ApiResponse<TokenTransaction[]>> {
+        const response = await this.client.get<ApiResponse<TokenTransaction[]>>('/api/admin/tokens');
         return response.data;
     }
 }

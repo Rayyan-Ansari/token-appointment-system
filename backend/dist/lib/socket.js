@@ -17,6 +17,20 @@ class SocketManager {
         });
         this.io.on('connection', (socket) => {
             console.log(`Client connected: ${socket.id}`);
+            const token = socket.handshake.auth?.token;
+            if (token) {
+                try {
+                    const payload = (0, auth_1.verifyToken)(token);
+                    socket.data.user = payload;
+                    socket.join(`user:${payload.userId}`);
+                    console.log(`User authenticated via handshake: ${payload.email} (${payload.role})`);
+                    socket.emit('authenticated', { success: true, user: payload });
+                }
+                catch (error) {
+                    console.error('Invalid token in socket handshake');
+                    socket.emit('authenticated', { success: false, message: 'Invalid token' });
+                }
+            }
             socket.on('authenticate', (token) => {
                 try {
                     const payload = (0, auth_1.verifyToken)(token);

@@ -3,7 +3,8 @@ import { hashPassword, comparePassword, generateToken } from '@/lib/auth';
 import {
   PatientRegisterInput,
   DoctorRegisterInput,
-  LoginInput
+  LoginInput,
+  UpdateProfileInput
 } from '@/lib/validators';
 import path from 'path';
 import fs from 'fs/promises';
@@ -318,6 +319,8 @@ class AuthService {
             licenseNumber: true,
             licenseDocumentPath: true,
             isActive: true,
+            workingHoursStart: true,
+            workingHoursEnd: true,
             createdAt: true,
             approvals: {
               select: {
@@ -353,6 +356,60 @@ class AuthService {
       default:
         throw new Error('Invalid role');
     }
+  }
+
+  // Update user profile
+  async updateProfile(userId: string, role: string, data: UpdateProfileInput) {
+    const id = BigInt(userId);
+    let currentRecord: any = null;
+
+    // Fetch the current user based on role to get the old passwordHash if needed
+    if (role === 'patient') {
+      currentRecord = await prisma.user.findUnique({ where: { id } });
+    } else if (role === 'doctor') {
+      currentRecord = await prisma.doctor.findUnique({ where: { id } });
+    } else {
+      throw new Error('Profile updates only supported for patients and doctors');
+    }
+
+    if (!currentRecord) throw new Error('User not found');
+
+    const updateData: any = {};
+    if (data.fullName) updateData.fullName = data.fullName;
+    if (data.email) updateData.email = data.email;
+    if (data.phone) updateData.phone = data.phone;
+    if (role === 'doctor') {
+      if (data.workingHoursStart !== undefined) updateData.workingHoursStart = data.workingHoursStart;
+      if (data.workingHoursEnd !== undefined) updateData.workingHoursEnd = data.workingHoursEnd;
+    }
+
+    // Password validation and update
+    if (data.newPassword) {
+      if (!data.currentPassword) {
+        throw new Error('Current password is required to set a new password');
+      }
+
+      const isPasswordValid = await comparePassword(data.currentPassword, currentRecord.passwordHash);
+      if (!isPasswordValid) {
+        throw new Error('Current password is incorrect');
+      }
+
+      updateData.passwordHash = await hashPassword(data.newPassword);
+    }
+
+    if (role === 'patient') {
+      await prisma.user.update({
+        where: { id },
+        data: updateData
+      });
+    } else if (role === 'doctor') {
+      await prisma.doctor.update({
+        where: { id },
+        data: updateData
+      });
+    }
+
+    return { success: true };
   }
 }
 

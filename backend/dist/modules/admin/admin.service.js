@@ -94,10 +94,13 @@ exports.adminService = {
                 email: true,
                 fullName: true,
                 phone: true,
+                dob: true,
+                sex: true,
                 specialization: true,
                 qualification: true,
                 yearsExperience: true,
                 licenseNumber: true,
+                licenseDocumentPath: true,
                 createdAt: true
             },
             orderBy: {
@@ -132,6 +135,9 @@ exports.adminService = {
                 email: true,
                 fullName: true,
                 phone: true,
+                dob: true,
+                sex: true,
+                address: true,
                 createdAt: true
             },
             orderBy: {
@@ -158,6 +164,60 @@ exports.adminService = {
             where: { id: patientIdBigInt }
         });
         return { success: true };
+    },
+    async getAllTokens() {
+        const tokens = await prisma.token.findMany({
+            include: {
+                patient: {
+                    select: {
+                        fullName: true,
+                        email: true,
+                        phone: true,
+                    }
+                },
+                session: {
+                    include: {
+                        doctor: {
+                            select: {
+                                fullName: true,
+                                specialization: true,
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                bookedAt: 'desc'
+            }
+        });
+        return tokens.map(token => ({
+            id: token.id.toString(),
+            tokenNo: token.tokenNo,
+            status: token.status,
+            bookedAt: token.bookedAt,
+            calledAt: token.calledAt,
+            servedAt: token.servedAt,
+            canceledAt: token.canceledAt,
+            noShowAt: token.noShowAt,
+            patient: {
+                id: token.patientId.toString(),
+                fullName: token.patient.fullName,
+                email: token.patient.email,
+                phone: token.patient.phone,
+            },
+            doctor: {
+                id: token.session.doctorId.toString(),
+                fullName: token.session.doctor.fullName,
+                specialization: token.session.doctor.specialization,
+            },
+            session: {
+                id: token.session.id.toString(),
+                sessionDate: token.session.sessionDate,
+                status: token.session.status,
+                currentTokenNo: token.session.currentTokenNo,
+                maxTokenNo: token.session.maxTokenNo,
+            }
+        }));
     }
 };
 //# sourceMappingURL=admin.service.js.map

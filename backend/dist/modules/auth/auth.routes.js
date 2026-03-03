@@ -39,6 +39,7 @@ router.post('/doctor/register', upload.single('licenseDocument'), auth_controlle
 router.post('/doctor/login', auth_controller_1.authController.loginDoctor);
 router.post('/admin/login', auth_controller_1.authController.loginAdmin);
 router.get('/me', auth_1.authMiddleware, auth_controller_1.authController.getMe);
+router.put('/profile', auth_1.authMiddleware, auth_controller_1.authController.updateProfile);
 router.use((error, req, res, next) => {
     if (error instanceof multer_1.default.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {

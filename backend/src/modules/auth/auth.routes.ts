@@ -22,7 +22,7 @@ const upload = multer({
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
-    
+
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -36,8 +36,8 @@ router.post('/patient/register', authController.registerPatient);
 router.post('/patient/login', authController.loginPatient);
 
 // Doctor routes
-router.post('/doctor/register', 
-  upload.single('licenseDocument'), 
+router.post('/doctor/register',
+  upload.single('licenseDocument'),
   authController.registerDoctor
 );
 router.post('/doctor/login', authController.loginDoctor);
@@ -47,6 +47,7 @@ router.post('/admin/login', authController.loginAdmin);
 
 // Protected route - get current user profile
 router.get('/me', authMiddleware, authController.getMe);
+router.put('/profile', authMiddleware, authController.updateProfile);
 
 // Error handling middleware for multer
 router.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -58,14 +59,14 @@ router.use((error: any, req: express.Request, res: express.Response, next: expre
       });
     }
   }
-  
+
   if (error.message.includes('Invalid file type')) {
     return res.status(400).json({
       success: false,
       message: error.message
     });
   }
-  
+
   next(error);
 });
 
