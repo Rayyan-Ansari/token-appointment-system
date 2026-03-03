@@ -9,10 +9,11 @@ const prisma = new client_1.PrismaClient();
 const SALT_ROUNDS = 12;
 async function main() {
     console.log('🌱 Starting database seed...');
+    // Create default admin user
     const adminPassword = await bcrypt_1.default.hash('admin123!@#', SALT_ROUNDS);
     const admin = await prisma.admin.upsert({
         where: { email: 'admin@tokenappointment.com' },
-        update: {},
+        update: { passwordHash: adminPassword },
         create: {
             email: 'admin@tokenappointment.com',
             passwordHash: adminPassword,
@@ -20,10 +21,11 @@ async function main() {
         }
     });
     console.log('✅ Admin user created:', admin.email);
+    // Create sample patients
     const patientPassword = await bcrypt_1.default.hash('patient123', SALT_ROUNDS);
     const patient1 = await prisma.user.upsert({
         where: { email: 'john.doe@example.com' },
-        update: {},
+        update: { passwordHash: patientPassword },
         create: {
             email: 'john.doe@example.com',
             passwordHash: patientPassword,
@@ -36,7 +38,7 @@ async function main() {
     });
     const patient2 = await prisma.user.upsert({
         where: { email: 'jane.smith@example.com' },
-        update: {},
+        update: { passwordHash: patientPassword },
         create: {
             email: 'jane.smith@example.com',
             passwordHash: patientPassword,
@@ -48,10 +50,12 @@ async function main() {
         }
     });
     console.log('✅ Sample patients created');
+    // Create sample doctors (approved and pending)
     const doctorPassword = await bcrypt_1.default.hash('doctor123', SALT_ROUNDS);
+    // Approved doctor
     const doctor1 = await prisma.doctor.upsert({
         where: { email: 'dr.wilson@example.com' },
-        update: {},
+        update: { passwordHash: doctorPassword },
         create: {
             email: 'dr.wilson@example.com',
             passwordHash: doctorPassword,
@@ -66,6 +70,7 @@ async function main() {
             isActive: true
         }
     });
+    // Create approval record for approved doctor
     const approval1 = await prisma.doctorApproval.create({
         data: {
             doctorId: doctor1.id,
@@ -75,9 +80,10 @@ async function main() {
             note: 'Verified credentials and license'
         }
     });
+    // Pending doctor
     const doctor2 = await prisma.doctor.upsert({
         where: { email: 'dr.johnson@example.com' },
-        update: {},
+        update: { passwordHash: doctorPassword },
         create: {
             email: 'dr.johnson@example.com',
             passwordHash: doctorPassword,
@@ -92,15 +98,17 @@ async function main() {
             isActive: false
         }
     });
+    // Create pending approval record
     const approval2 = await prisma.doctorApproval.create({
         data: {
             doctorId: doctor2.id,
             status: 'PENDING'
         }
     });
+    // Another approved doctor
     const doctor3 = await prisma.doctor.upsert({
         where: { email: 'dr.patel@example.com' },
-        update: {},
+        update: { passwordHash: doctorPassword },
         create: {
             email: 'dr.patel@example.com',
             passwordHash: doctorPassword,
@@ -125,6 +133,7 @@ async function main() {
         }
     });
     console.log('✅ Sample doctors created');
+    // Create a sample session with some tokens (for demo purposes)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const sampleSession = await prisma.session.upsert({
@@ -144,12 +153,14 @@ async function main() {
             startedAt: new Date()
         }
     });
+    // Create sample tokens (each patient can only have one active token per session)
     const tokens = [
         { tokenNo: 1, status: 'SERVED', patientId: patient1.id },
         { tokenNo: 2, status: 'SERVED', patientId: patient2.id },
         { tokenNo: 3, status: 'CALLED', patientId: patient1.id },
         { tokenNo: 4, status: 'WAITING', patientId: patient2.id }
     ];
+    // First clear any existing tokens for this session
     await prisma.token.deleteMany({
         where: {
             sessionId: sampleSession.id
@@ -164,20 +175,14 @@ async function main() {
                 }
             },
             update: {},
-            create: {
-                sessionId: sampleSession.id,
-                patientId: tokenData.patientId,
-                tokenNo: tokenData.tokenNo,
-                status: tokenData.status,
-                ...(tokenData.status === 'SERVED' && {
-                    calledAt: new Date(Date.now() - 60000),
-                    servedAt: new Date(Date.now() - 30000)
-                }),
-                ...(tokenData.status === 'CALLED' && {
-                    calledAt: new Date()
-                })
-            }
+            create: Object.assign(Object.assign({ sessionId: sampleSession.id, patientId: tokenData.patientId, tokenNo: tokenData.tokenNo, status: tokenData.status }, (tokenData.status === 'SERVED' && {
+                calledAt: new Date(Date.now() - 60000), // Called 1 minute ago
+                servedAt: new Date(Date.now() - 30000) // Served 30 seconds ago
+            })), (tokenData.status === 'CALLED' && {
+                calledAt: new Date() // Called now
+            }))
         });
+        // Create corresponding logs
         await prisma.tokenLog.create({
             data: {
                 tokenId: (await prisma.token.findFirst({
@@ -215,4 +220,3 @@ main()
     .finally(async () => {
     await prisma.$disconnect();
 });
-//# sourceMappingURL=seed.js.map
